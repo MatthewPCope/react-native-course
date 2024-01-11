@@ -1,66 +1,78 @@
 import { useState } from 'react';
 
-import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
+import { StyleSheet, View, FlatList, Button } from 'react-native';
+import GearItem from './components/GearItem';
+import GearInput from './components/GearInput';
+import { StatusBar } from 'expo-status-bar';
 
 export default function App() {
-  const [enteredGearText, setEnteredGearText] = useState('')
-  const [courseGear, setCourseGear] = useState([])
   
-  function gearInputHandler(enteredText){
-    setEnteredGearText(enteredText)
-  }
-  function addGearHandler(){
+  const [courseGear, setCourseGear] = useState([])
+  const [modalIsVisible, setModalIsVisible] = useState(false)
+  
+  function addGearHandler(enteredGearText){
     setCourseGear( currentCourseGear => [
       ...currentCourseGear,
-      enteredGearText,
+      {text: enteredGearText, id: Math.random().toString()},
     ])
+    endAddGearHandler()
+  }
+  function deleteGearHandler(id){
+    setCourseGear(currentCourseGear => {
+      return currentCourseGear.filter((gear) => gear.id !== id)
+    })
+  }
+  function startAddGearHandler(){
+    setModalIsVisible(true)
+  }
+  function endAddGearHandler(){
+    setModalIsVisible(false)
   }
 
   return (
+    <>
+    <StatusBar style="light"/>
     <View style={styles.appContainer}>
-        <View style={styles.inputContainer}>
-          <TextInput style={styles.textInput} 
-            placeholder='Add a piece of gear!' 
-            onChangeText={gearInputHandler}/>
-          <Button title="Add Gear" onPress={addGearHandler}/>
-        </View>
+        <Button 
+          title="Add New Gear" 
+          color="#f31282" 
+          onPress={startAddGearHandler}/>
+        <GearInput visible={modalIsVisible} onAddGear={addGearHandler} onCancel={endAddGearHandler}/>
         <View style={styles.gearContainer}>
-          {courseGear.map((gear) => <Text style={styles.gearItem}key={gear}>{gear}</Text>)}
+        <FlatList 
+          data={courseGear}
+          renderItem={(itemData) => {
+            return (
+              <GearItem 
+                text={itemData.item.text} 
+                id={itemData.item.id} 
+                onDeleteItem={deleteGearHandler}
+              />
+            )
+        }}
+        keyExtractor={(item, index) => {
+          return item.id
+        }}
+        />
+          
+        
         </View>
     </View>
+    </>
   );
 }
+
 
 const styles = StyleSheet.create({
   appContainer: {
     flex: 1,
     paddingTop: 50,
-    paddingHorizontal: 16
+    paddingHorizontal: 16,
+    
   },
-  inputContainer:{
-    flex: 1,
-    flexDirection:"row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: "#cccccc"
-  },
-  textInput:{
-    borderWidth: 1,
-    borderColor: "#cccccc",
-    width:"70%",
-    marginRight:8,
-    padding: 8
-  },
+  
   gearContainer:{
     flex: 5
   },
-  gearItem:{
-    margin: 8,
-    padding:8,
-    borderRadius:6,
-    backgroundColor:"#5e0acc",
-    color:"white"
-  }
+  
 });
