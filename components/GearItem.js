@@ -4,7 +4,7 @@ function GearItem(props){
     return (
         <View style={styles.gearItem}>
             <Pressable 
-            android_ripple={{color:'red'}}
+            
             onPress={props.onDeleteItem.bind(this, props.id)}
             style={({pressed}) => pressed && styles.pressedItem}>
             <Text style={styles.gearText}>
